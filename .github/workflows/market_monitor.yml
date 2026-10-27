@@ -1,0 +1,39 @@
+
+name: Energy Market Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * 1-5'
+
+permissions:
+  contents: read
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run market monitor
+        run: python energy_monitor.py
+
+      - name: Upload generated reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: energy-market-report
+          path: output/
+          retention-days: 30
+          if-no-files-found: error
